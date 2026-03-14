@@ -12,10 +12,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "Order")
+@Table(name = "orders")
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
@@ -33,9 +36,8 @@ public class Order {
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> items = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -54,14 +56,41 @@ public class Order {
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     @LastModifiedDate
     @Column(nullable = false)
-    private LocalDate updatedAt;
+    private LocalDateTime updatedAt;
+
+    public Order(){}
+
+    public Order(User user, Store store, List<OrderItem> items, OrderStatus orderStatus, BigDecimal totalAmount, OrderType orderType, LocalDate rentalStartDate, LocalDate rentalEndDate) {
+        this.user = user;
+        this.store = store;
+        this.items = items;
+        this.orderStatus = orderStatus;
+        this.totalAmount = totalAmount;
+        this.orderType = orderType;
+        this.rentalStartDate = rentalStartDate;
+        this.rentalEndDate = rentalEndDate;
 
 
+        if (items != null) {
+            items.forEach(item -> item.setOrder(this));
+        }
+    }
 
 
+    public Order(User user, Store store, List<OrderItem> items, OrderStatus orderStatus, BigDecimal totalAmount, OrderType orderType) {
+        this.user = user;
+        this.store = store;
+        this.items = items;
+        this.orderStatus = orderStatus;
+        this.totalAmount = totalAmount;
+        this.orderType = orderType;
 
+        if (items != null) {
+            items.forEach(item -> item.setOrder(this));
+        }
+    }
 }

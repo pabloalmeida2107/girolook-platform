@@ -3,6 +3,8 @@ package Girolook.com.GiroLook.models;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -16,6 +18,10 @@ import java.util.UUID;
 @Table(name = "stores")
 @Getter
 @Setter
+
+@SQLDelete(sql = "UPDATE stores SET active = false WHERE id = ?")
+
+@SQLRestriction("active = true")
 public class Store {
 
     @Id
@@ -27,12 +33,15 @@ public class Store {
     private User owner;
 
     @Column(nullable = false)
+    private boolean active = true;
+
+    @Column(nullable = false)
     private String name;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private String LogoUrl;
+    private String logoUrl;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -45,4 +54,12 @@ public class Store {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     private List<Product> products;
 
+    public Store(User owner, String name, String description, String logoUrl) {
+        this.owner = owner;
+        this.name = name;
+        this.description = description;
+        this.logoUrl = logoUrl;
+    }
+
+    public Store(){}
 }

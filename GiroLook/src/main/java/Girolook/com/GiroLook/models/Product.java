@@ -8,6 +8,8 @@ import Girolook.com.GiroLook.models.enums.ProductType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -22,6 +24,10 @@ import java.util.UUID;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
+
+@SQLDelete(sql = "UPDATE products SET active = false WHERE id = ?")
+
+@SQLRestriction("active = true")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -33,6 +39,9 @@ public class Product {
 
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
+    private boolean active = true;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -49,11 +58,11 @@ public class Product {
 
     private String color;
 
-    private String imageURL;
+    private String imageUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ProductStatus status;
+    private ProductStatus status = ProductStatus.AVAILABLE;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -68,6 +77,17 @@ public class Product {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    public Product(){}
 
-
+    public Product(Store store, String name, String description, BigDecimal price, String size, Category category, String color, String imageUrl, ProductType type) {
+        this.store = store;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.size = size;
+        this.category = category;
+        this.color = color;
+        this.imageUrl = imageUrl;
+        this.type = type;
+    }
 }
