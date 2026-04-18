@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -16,7 +17,13 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
-    // ... (você já deve ter o método generateToken aqui)
+    public String generateToken(User user) {
+        return JWT.create()
+                .withIssuer("girolook-api")
+                .withSubject(user.getEmail())
+                .withExpiresAt(Instant.now().plusSeconds(7200))
+                .sign(Algorithm.HMAC256(secret));
+    }
 
     // ESTE É O MÉTODO QUE ESTÁ FALTANDO:
     public String validateToken(String token) {

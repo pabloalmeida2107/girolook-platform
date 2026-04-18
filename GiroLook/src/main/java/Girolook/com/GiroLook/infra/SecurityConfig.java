@@ -30,7 +30,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
                         // 🔓 Liberando a rota de CRIAÇÃO de usuário (POST)
-                        .requestMatchers(HttpMethod.POST, "/users/create").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users/create","/users/login").permitAll()
 
                         // 🔐 O resto do sistema exige Token JWT
                         .anyRequest().authenticated()

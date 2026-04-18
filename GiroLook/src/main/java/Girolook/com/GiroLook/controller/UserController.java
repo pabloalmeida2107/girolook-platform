@@ -4,6 +4,7 @@ package Girolook.com.GiroLook.controller;
 import Girolook.com.GiroLook.dto.request.UserCreateRequestDTO;
 import Girolook.com.GiroLook.dto.request.UserRegistrationRequestDTO;
 import Girolook.com.GiroLook.dto.request.UserUpdateRequestDTO;
+import Girolook.com.GiroLook.dto.response.LoginResponseDTO;
 import Girolook.com.GiroLook.dto.response.UserResponseDTO;
 import Girolook.com.GiroLook.models.User;
 import Girolook.com.GiroLook.service.UserService;
@@ -57,10 +58,12 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserResponseDTO> loginUser(@Valid @RequestBody UserRegistrationRequestDTO request){
-        UserResponseDTO response = userService.login(request);
+    public ResponseEntity<LoginResponseDTO> loginUser(
+            @Valid @RequestBody UserRegistrationRequestDTO request) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        String token = userService.login(request);
+
+        return ResponseEntity.ok(new LoginResponseDTO(token));
     }
 
 

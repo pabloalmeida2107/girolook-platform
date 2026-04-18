@@ -9,11 +9,15 @@ import Girolook.com.GiroLook.exceptions.BusinessException;
 import Girolook.com.GiroLook.exceptions.ResourceNotFoundException;
 import Girolook.com.GiroLook.exceptions.UnauthorizedAccessException;
 import Girolook.com.GiroLook.exceptions.UserAlreadyExistsException;
+import Girolook.com.GiroLook.infra.TokenService;
 import Girolook.com.GiroLook.models.User;
 import Girolook.com.GiroLook.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +27,12 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private TokenService tokenService;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -109,21 +119,18 @@ public class UserService {
 
     }
 
-    public UserResponseDTO login(UserRegistrationRequestDTO request) {
+    public String login(UserRegistrationRequestDTO request) {
 
-        User user = userRepository.findUserByEmail(request.email())
-                .orElseThrow(() -> new BadCredentialsException("E-mail ou senha incorretos."));
+        var usernamePassword = new UsernamePasswordAuthenticationToken(
+                request.email(),
+                request.password()
+        );
 
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new BadCredentialsException("E-mail ou senha incorretos.");
-        }
+        var auth = authenticationManager.authenticate(usernamePassword);
 
-        if (!user.isActive()) {
+        User user = (User) auth.getPrincipal();
 
-            throw new BusinessException("Esta conta foi desativada. Entre em contato com o suporte para reativar.");
-        }
-
-        return convertToResponseDTO(user);
+        return tokenService.generateToken(user);
     }
 
     private UserResponseDTO convertToResponseDTO(User user) {
