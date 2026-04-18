@@ -35,7 +35,8 @@ public class SecurityFilter extends OncePerRequestFilter {
         // 🔓 ROTAS LIBERADAS (SEM TOKEN)
         if (path.contains("/users/create") ||
                 path.contains("/v3/api-docs") ||
-                path.contains("/swagger-ui")) {
+                path.contains("/swagger-ui") ||
+                path.contains("/users/login")) {
 
             filterChain.doFilter(request, response);
             return;
