@@ -21,26 +21,18 @@ public class SecurityConfig {
     private SecurityFilter securityFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
-                .csrf(csrf -> csrf.disable()) // Desabilitamos CSRF pois usaremos Tokens (Stateless)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Não cria sessões
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(csrf -> csrf.disable()) // 🚨 ISSO AQUI É VITAL! Desabilita o CSRF
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        // 1. Liberar rotas de Autenticação (Login e Cadastro)
-                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/create").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-
-                        // 2. Liberar rotas do Swagger (Documentação)
+                        // 🔓 Rotas Públicas (Swagger + Criar Usuário)
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users/create").permitAll() // 👈 Libere a rota de cadastro!
 
-
-
-                        // 3. Qualquer outra requisição exige que o usuário esteja logado
+                        // 🔐 O resto exige login
                         .anyRequest().authenticated()
                 )
-                // 4. Adicionamos o nosso filtro de JWT ANTES do filtro padrão do Spring
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -56,5 +48,7 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+
 }
 
