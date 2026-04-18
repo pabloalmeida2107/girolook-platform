@@ -30,13 +30,12 @@ public class SecurityFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String path = request.getServletPath();
+        String path = request.getRequestURI();
 
         // 🔓 ROTAS LIBERADAS (SEM TOKEN)
-        if (path.equals("/users/create") ||
-                path.startsWith("/v3/api-docs") ||
-                path.startsWith("/swagger-ui") ||
-                path.equals("/swagger-ui.html")) {
+        if (path.contains("/users/create") ||
+                path.contains("/v3/api-docs") ||
+                path.contains("/swagger-ui")) {
 
             filterChain.doFilter(request, response);
             return;
