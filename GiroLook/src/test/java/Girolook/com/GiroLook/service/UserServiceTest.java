@@ -334,13 +334,18 @@ class UserServiceTest {
         @Test
         @DisplayName("deve fazer login com sucesso com credenciais válidas")
         void shouldLoginSuccessfully() {
+            // 1. Mock do repositório encontrando o usuário
             when(userRepository.findUserByEmail("joao@email.com")).thenReturn(Optional.of(activeUser));
+
+            // 2. Mock do encoder validando a senha
             when(passwordEncoder.matches("senha123", "hashed_password")).thenReturn(true);
 
-            UserResponseDTO response = userService.login(validRequest);
+            // 🚨 AQUI ESTAVA O ERRO: O login retorna o TOKEN (String), não o DTO
+            String token = userService.login(validRequest);
 
-            assertThat(response).isNotNull();
-            assertThat(response.email()).isEqualTo("joao@email.com");
+            // 3. Verificações (Asserções)
+            assertThat(token).isNotNull();
+            assertThat(token).isNotBlank(); // Verifica se o token não está vazio
         }
 
         @Test
