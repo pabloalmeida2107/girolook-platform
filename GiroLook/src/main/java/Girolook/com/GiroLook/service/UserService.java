@@ -13,7 +13,7 @@ import Girolook.com.GiroLook.models.User;
 import Girolook.com.GiroLook.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
