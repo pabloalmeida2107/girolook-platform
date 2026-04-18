@@ -36,7 +36,7 @@ public class TokenService {
                     .getSubject();             // Se estiver OK, devolve o e-mail (Subject)
         } catch (JWTVerificationException exception) {
             // Se o token estiver expirado ou for falso, ele cai aqui
-            return "";
+            return null;
         }
     }
 }
