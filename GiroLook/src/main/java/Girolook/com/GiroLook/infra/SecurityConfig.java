@@ -23,16 +23,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(csrf -> csrf.disable()) // 🚨 ISSO AQUI É VITAL! Desabilita o CSRF
+                .csrf(csrf -> csrf.disable()) // 🚨 ESSENCIAL: Desabilita a proteção CSRF
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        // 🔓 Rotas Públicas (Swagger + Criar Usuário)
+                        // 🔓 Permite acesso ao Swagger
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/create").permitAll() // 👈 Libere a rota de cadastro!
 
-                        // 🔐 O resto exige login
+                        // 🔓 Permite a criação de usuário sem estar logado
+                        .requestMatchers(HttpMethod.POST, "/users/create").permitAll()
+
+                        // 🔐 Todas as outras rotas exigem login (Token JWT)
                         .anyRequest().authenticated()
                 )
+                // Adiciona seu filtro de segurança antes do padrão do Spring
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
