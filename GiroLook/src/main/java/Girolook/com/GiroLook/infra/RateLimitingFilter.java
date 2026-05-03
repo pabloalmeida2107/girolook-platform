@@ -2,7 +2,6 @@ package Girolook.com.GiroLook.infra;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,22 +15,20 @@ import java.time.Duration;
 @Component
 public class RateLimitingFilter extends OncePerRequestFilter {
 
-
     private final Bucket createBucket = Bucket.builder()
-            .addLimit(Bandwidth.classic(5, Refill.intervally(5, Duration.ofMinutes(1))))
+            .addLimit(Bandwidth.builder().capacity(5).refillIntervally(5, Duration.ofMinutes(1)).build())
             .build();
 
-
     private final Bucket loginBucket = Bucket.builder()
-            .addLimit(Bandwidth.classic(10, Refill.intervally(10, Duration.ofMinutes(1))))
+            .addLimit(Bandwidth.builder().capacity(10).refillIntervally(10, Duration.ofMinutes(1)).build())
             .build();
 
     private final Bucket storeBucket = Bucket.builder()
-            .addLimit(Bandwidth.classic(2, Refill.intervally(2, Duration.ofHours(1))))
+            .addLimit(Bandwidth.builder().capacity(2).refillIntervally(2, Duration.ofHours(1)).build())
             .build();
 
     private final Bucket productBucket = Bucket.builder()
-            .addLimit(Bandwidth.classic(20, Refill.intervally(20, Duration.ofMinutes(1))))
+            .addLimit(Bandwidth.builder().capacity(20).refillIntervally(20, Duration.ofMinutes(1)).build())
             .build();
 
     @Override
@@ -41,13 +38,13 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         if (path.startsWith("/users/create")) {
-            applyRateLimit(createBucket, response, filterChain,request);
+            applyRateLimit(createBucket, response, filterChain, request);
         } else if (path.startsWith("/users/login")) {
-            applyRateLimit(loginBucket, response, filterChain,request);
+            applyRateLimit(loginBucket, response, filterChain, request);
         } else if (path.startsWith("/stores/create")) {
-            applyRateLimit(storeBucket, response, filterChain,request); // Proteção de infraestrutura
+            applyRateLimit(storeBucket, response, filterChain, request);
         } else if (path.startsWith("/products/create")) {
-            applyRateLimit(productBucket, response, filterChain,request); // Proteção contra spam
+            applyRateLimit(productBucket, response, filterChain, request);
         } else {
             filterChain.doFilter(request, response);
         }
