@@ -21,24 +21,23 @@ public class SecurityConfig {
     @Autowired
     private SecurityFilter securityFilter;
 
+    @Autowired
+    private RateLimitingFilter rateLimitingFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable()) // 🚨 ESSENCIAL: Desabilita o CSRF para APIs REST
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        // 🔓 Liberando Swagger e Documentação
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-
-                        // 🔓 Liberando a rota de CRIAÇÃO de usuário (POST)
                         .requestMatchers(HttpMethod.POST, "/users/create").permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
-
-                        // 🔐 O resto do sistema exige Token JWT
                         .anyRequest().authenticated()
                 )
                 .cors(Customizer.withDefaults()) // Diz ao Spring Security: "Use as regras de CORS que eu defini"
+                .addFilterBefore(rateLimitingFilter, SecurityFilter.class)
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
